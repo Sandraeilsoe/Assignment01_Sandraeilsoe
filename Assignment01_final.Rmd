@@ -1,0 +1,242 @@
+---
+title: "Portfolio exam - Part 1 | Methods 1 F26, CogSci @AU"
+author: "Sandra Elisabeth Rosholm Eilsø"
+date: "06/10/2026"
+output: html_document
+---
+
+------------------------------------------------------------------------
+
+#### Deadline for feedback: October 06 2026 h23:59
+
+#---------------------------------- \# GENERAL INSTRUCTIONS #----------------------------------
+
+# 1. GITHUB:
+
+# When you are done completing the below code, please push to Github with a commit comment (use \_ for spaces in the message)
+
+# You can push as many times as you would like. The last version that you commit before the assignment deadline is the one that will be reviewed for feedback.
+
+# Please use your individual Github account to push assignments.
+
+# Only push *code* Github, so only store your code in your Github repository.
+
+#----------------------------------
+
+# 2. PUSH CODE & KNIT HTML MARKDOWN DOCUMENT.
+
+# Please push your code AND a knit HTML file of the document to Github.
+
+#----------------------------------
+
+# 3. THIS IS AN INDIVIDUAL ASSIGNMENT.
+
+**Please write your name in the `author` field above.**
+
+#----------------------------------
+
+# 4. Suppressing code output.
+
+# Please suppress code output that is not for evaluation (e.g., printouts of data frames, variable values, etc.) by setting echo = FALSE in chunks where only code is being run. This will make it much easier to evaluate your HTML output files.
+
+#----------------------------------
+
+#### Introduction
+
+The goal of this exam is to write a short data mining report on the CogSci Intro Week Personality Test Data in which you answer the following questions **in prose, code and graphs**.
+
+First of all, let's start by looking at the setup chunk. If you need to load packages or set your working directory, do so here:
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE, include = TRUE, message = FALSE, warning = FALSE)
+## your code goes here
+install.packages("pacman")
+library(pacman)
+pacman::p_load(tidyverse, pastecs)
+
+```
+
+For this assignment you will use the version of the "personality test" data on UCloud, saved in the Drive "assignments_exercises".
+
+You can find this Drive on UCloud by clicking on the "Drives" icon on the left panel. Inside of this Drive is a folder called "data". This is where you will find the Assignment1_data.csv file.
+
+When you load your Job parameters in UCloud, you will need to add this folder. To do this, click "Add Folder #2" (Folder #1 is always your cogsci methods folder). In the resulting pop-up box, navigate to the assignments_exercises drive on the right panel and click "Use" next to the "data" folder in this Drive.
+
+If you did the above successfully, then you should see the data folder under /work/data.
+
+Assuming you have started your job, now you have to import the personality data from the 'Assignment1_data.csv' file which should be in /work/data/Assignment1_data.csv.
+
+Once you have imported it, use the `head()` function to print the first 10 lines of the data set.
+
+```{r load_data}
+## your code goes here
+data <- read_csv("../Assignment1_data.csv")
+
+head(data)
+
+```
+
+Once you are done loading the data, you can start working on the questions below.
+
+### Question 1
+
+#### Question 1.1
+
+Who can hold their breath the longest on average — those with right or left ocular dominance? Notice that the column is called `ocular_dom`, and that right ocular dominance is indicated in the column with 'Right', while left ocular dominance is indicated in the column with 'Left'. Therefore, you want to only filter out the data in this column which corresponds to either "Right" or "Left".
+
+Plot the data using `ggplot2` to find out the answer to your question. The plots should include error bars depicting the standard error of the mean: you can add these using the `geom_errorbar()` function and specifying `stat = "summary", fun.data = "mean_se"`.
+
+```{r}
+filtered_ocular_dom <- data %>% 
+    filter(ocular_dom != "Both")
+  
+filtered_ocular_dom %>% 
+  ggplot(aes(x = ocular_dom, y = breathhold)) +
+  geom_bar(stat = "summary", fun.data = "mean_se", fill ="royalblue") +
+  geom_errorbar(stat ="summary", fun.data = "mean_se") +
+  labs(title = "Breathhold and ocular domiance", y = "Breathhold in seconds", x = "Ocular Dominance")
+
+```
+
+
+#### Question 1.2
+
+Then use the `mean()` and `sd()` functions *within a tidyverse pipe* to make a summary data set, in which you show mean and standard deviation of the two eye dominance groups.
+
+Bonus question: If you feel brave, you can instead try making a boxplot (`geom_boxplot()`) or a violin plot (`geom_violin()`) which are better at representing the actual distribution of the data (compared to a bar plot, which only depicts mean and standard deviation).
+
+```{r question1}
+## your code goes here
+
+filtered_ocular_dom %>% 
+  group_by(ocular_dom) %>% 
+  summarise("mean of breathhold" = mean(breathhold), "SD of breathhold" = sd(breathhold)) %>% data.frame()
+
+
+filtered_ocular_dom %>% 
+  ggplot(aes(x = ocular_dom, y = breathhold)) +
+  geom_point() +
+  geom_violin(fill = "brown", alpha = 0.25) +
+  labs(title = "Violin plot for breathhold and ocular dominance", x = "Ocular Dominance", y = "Breathhold")
+
+
+```
+
+Explain your results in plain terms here (max 3 sentences):
+
+There is no clear difference between left- and right ocular dominance. In question 1.1 it can be seen that the error bars are overlapping. This indicates that the mean of the breath hold of the two groups do not clearly differ from each other. 
+
+------------------------------------------------------------------------
+
+#### Question 2
+
+Who likes silence vs. noise best -- by gender? Also in this case you should plot the data using `ggplot2` (including error bars depicting the standard error of the mean), then use the `mean()` and `sd()` functions to find mean and standard deviation of the two genders (still making a summary data set with tidyverse and pipes).
+
+Bonus question: If you feel brave, you can instead try making a boxplot (`geom_boxplot()`) or a violin plot (`geom_violin()`) which are better at representing the actual distribution of the data (compared to a bar plot, which only depicts mean and standard deviation).
+
+```{r question2}
+## your code goes here
+
+data %>%
+  filter(gender != "other") %>% 
+  group_by(gender) %>% 
+  summarise("mean of sound_level_pref" = mean(sound_level_pref), "SD of sound level prefference" = sd(sound_level_pref)) %>% data.frame()
+
+data %>% 
+  filter(gender != "other") %>% 
+  ggplot(aes(x = gender, y = sound_level_pref)) +
+  geom_point() +
+  geom_violin(fill = "darkgreen", alpha = 0.25) +
+  geom_errorbar(stat ="summary", fun.data = "mean_se", width = 0.2)
+
+
+
+```
+
+Explain your results in plain terms here (max 3 sentences):
+
+This violin plot shows very similar distribution in sound level preference between male and female.The vertical line inside each plot with two horizontal lines shows the standard error around the mean. The strong overlap between the violins and their error bars suggest that gender does not play a meaningful role in sound level preference. 
+
+------------------------------------------------------------------------
+
+#### Question 3
+
+Shoe size could tell us something about general body size, which could also be connected to one's ability to hold your breath. In other words we predict that there is a positive relation between shoe size and how long time CogSci students can hold their breath. Try plotting the two sets of data against each other using a *scatter plot* (hint: both variables are continuous variables). You can make a scatter plot in `ggplot2` using the `geom_point()` function and plotting one variable on each axis. Use grouping in your plot to distinguish the relationship between shoe size and holding breath for the different gender subgroups, since we expect at least some of the groups to have different shoe sizes relative to each other. You can for instance use the `color` parameter within the `aes()` function to color by gender.
+
+```{r question3}
+## your code goes here
+
+data %>% 
+  ggplot(aes(x = shoesize, y = breathhold, color = gender)) +
+  geom_point(size = 3, alpha = 0.5) +
+  theme_minimal() +
+  labs (x= "Shoesize", y = "Breathhold in seconds", color = "gender")
+
+
+
+```
+
+Explain your results in plain terms here (max 3 sentences):
+
+When visually scanning the scatter plot, it can be seen that there is a positive relationship between shoe size and ability to hold your breath for longer. Students with larger shoe sizes tend to hold their breath for longer. This pattern can be seen across genders, because females with larger shoe sizes also tend to hold their breath for longer compared to smaller shoe sizes among the women. 
+
+------------------------------------------------------------------------
+
+#### Question 4
+
+Is the `breathhold` variable normally distributed? Provide both visual (histogram and QQ-plot) and numeric (Shapiro-Wilk test and skewness/kurtosis values) support for your answer.
+
+```{r question4}
+## your code goes here
+
+data %>% 
+  ggplot(aes(x= breathhold)) + 
+  geom_histogram(bins = 30, fill = "royalblue", color = "black") +
+  theme_minimal() +
+  labs(title = "Visualization Of Breathhold", subtitle = "Histogram", x = "Breathhold in seconds", y = "count of participants")
+
+
+stat.desc(data$breathhold, norm = TRUE, basic = FALSE)
+
+
+```
+
+The histogram shows that the breath hold times are not normally distributed. The skewness is 1.4 which is a high value and indicates asymmetry. The kurtosis is also 2.06 which differs from the normal value of 3 - this further supports that the distribution is not normal. 
+
+------------------------------------------------------------------------
+
+#### Question 5
+
+Are the two balloon reaction time variables (`balloon` and `balloon_balance`) normally distributed? Provide visual (histogram and QQ-plot) and numeric (Shapiro-Wilk test and skewness/kurtosis values) support for your answer.
+
+If they are not, then discuss your results below.
+
+```{r question5}
+## your code goes here
+
+data %>% 
+  ggplot(aes(x= balloon)) + 
+  geom_histogram(bins = 30, fill = "magenta", color = "black") +
+  theme_minimal() +
+  labs(title = "Visualization Of Balloon", subtitle = "Histogram")
+
+data %>% 
+  ggplot(aes(x= balloon_balance)) + 
+  geom_histogram(bins = 30, fill = "plum", color = "black") +
+  theme_minimal() +
+  labs(title = "Visualization Of Balloon balance", subtitle = "Histogram")
+
+
+stat.desc(data$balloon, norm = TRUE, basic = FALSE)
+
+stat.desc(data$balloon_balance, norm = TRUE, basic = FALSE)
+
+```
+
+------------------------------------------------------------------------
+
+Explain your results in plain terms here (max 3 sentences):
+
+No, none of them are normally distributed. The kurtosis of the two are respectively 3.4 and 2.3 and skewness value of 2.3 and 1.9. Kurtosis should be no more than -0.5/0.5 and kurtosis at the value of 3. 
+
+That's all!
